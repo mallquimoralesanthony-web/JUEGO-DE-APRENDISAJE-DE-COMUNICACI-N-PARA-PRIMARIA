@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>¡Aventura de Palabras Mágicas!</title>
+
+<style>
+body{
+    font-family: 'Comic Sans MS', Arial;
+    background: linear-gradient(135deg,#ff9a9e,#fad0c4);
+    text-align:center;
+    color:#222;
+}
+
+/* TÍTULO */
+h1{
+    font-size:50px;
+    color:#ff0066;
+    text-shadow:3px 3px white;
+}
+
+/* CONTENEDOR */
+.container{
+    background:white;
+    width:80%;
+    margin:auto;
+    padding:25px;
+    border-radius:25px;
+    box-shadow:0px 0px 20px rgba(0,0,0,0.3);
+}
+
+/* TEXTO GRANDE */
+#question{
+    font-size:30px;
+    font-weight:bold;
+    margin:20px;
+}
+
+/* OPCIONES GRANDES */
+.option{
+    display:block;
+    margin:15px;
+    padding:18px;
+    font-size:22px;
+    background:#00c6ff;
+    color:white;
+    border-radius:15px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.option:hover{
+    background:#0072ff;
+    transform:scale(1.05);
+}
+
+/* RESPUESTAS */
+.correct{background:#4caf50 !important;}
+.wrong{background:#f44336 !important;}
+
+/* BOTONES */
+button{
+    padding:15px 30px;
+    font-size:20px;
+    background:#ff9800;
+    color:white;
+    border:none;
+    border-radius:15px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#e65100;
+}
+
+/* TEXTO IMPORTANTE */
+#timer{
+    font-size:25px;
+    color:#d50000;
+    font-weight:bold;
+}
+
+.autor{
+    font-size:22px;
+    color:#6a1b9a;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<h1>✨ ¡Aventura de Palabras Mágicas! ✨</h1>
+
+<!-- INTRO -->
+<div class="container" id="intro">
+
+    <h2 style="font-size:32px;">🎮 Bienvenido</h2>
+
+    <p class="autor">👑 Creado por: ANTHONY BRAJHAN MALLQUI MORALES</p>
+
+    <p style="font-size:22px;">
+        💡 Lee bien cada pregunta y elige la mejor respuesta
+    </p>
+
+    <button onclick="mostrarMenu()">🚀 Empezar Juego</button>
+
+</div>
+
+<!-- MENU -->
+<div class="container" id="menu" style="display:none;">
+    <h2 style="font-size:30px;">🎯 Elige Nivel</h2>
+
+    <button onclick="iniciar('facil')">🟢 Fácil</button>
+    <button onclick="iniciar('medio')">🟡 Medio</button>
+    <button onclick="iniciar('dificil')">🔴 Difícil</button>
+</div>
+
+<!-- JUEGO -->
+<div class="container" id="game" style="display:none;">
+
+    <p class="autor">👑 Autor: ANTHONY BRAJHAN MALLQUI MORALES</p>
+
+    <div id="nivel" style="font-size:24px;font-weight:bold;"></div>
+    <div id="timer"></div>
+    <div id="question"></div>
+    <div id="options"></div>
+    <div id="message" style="font-size:22px;"></div>
+
+    <button onclick="siguiente()">➡️ Siguiente</button>
+
+</div>
+
+<script>
+const preguntas={
+facil:[
+{q:"¿Cuál es un sustantivo?",o:["Mesa","Correr","Bonito"],a:0},
+{q:"¿Cuál es un verbo?",o:["Perro","Jugar","Rojo"],a:1},
+{q:"¿Cuál está en plural?",o:["Niño","Niños","Niña"],a:1}
+],
+medio:[
+{q:"¿Cuál es el sujeto?",o:["Corre rápido","El niño corre","Corre mucho"],a:1},
+{q:"¿Cuál es un adjetivo?",o:["Casa","Grande","Correr"],a:1}
+],
+dificil:[
+{q:"¿Qué es 'rápidamente'?",o:["Adverbio","Verbo","Sustantivo"],a:0},
+{q:"¿Cuál es un artículo?",o:["El","Correr","Azul"],a:0}
+]
+};
+
+const mensajes=["🌟 ¡Excelente!","💪 ¡Muy bien!","🚀 ¡Sigue así!","👏 ¡Genial!"];
+
+let nivel="",actual=0,score=0,tiempo=10,timer;
+
+function mostrarMenu(){
+    document.getElementById("intro").style.display="none";
+    document.getElementById("menu").style.display="block";
+}
+
+function iniciar(n){
+    nivel=n;actual=0;score=0;
+    document.getElementById("menu").style.display="none";
+    document.getElementById("game").style.display="block";
+    cargar();
+}
+
+function cargar(){
+    clearInterval(timer);
+    let p=preguntas[nivel][actual];
+
+    document.getElementById("nivel").textContent="Nivel: "+nivel.toUpperCase();
+    document.getElementById("question").textContent=p.q;
+    document.getElementById("message").textContent="";
+
+    let html="";
+    p.o.forEach((opt,i)=>{
+        html+=`<div class="option" onclick="responder(${i})">${opt}</div>`;
+    });
+
+    document.getElementById("options").innerHTML=html;
+
+    tiempo=10;
+    timer=setInterval(()=>{
+        tiempo--;
+        document.getElementById("timer").textContent="⏱️ Tiempo: "+tiempo;
+        if(tiempo==0){
+            clearInterval(timer);
+            document.getElementById("message").textContent="⏰ Tiempo terminado";
+        }
+    },1000);
+}
+
+function responder(i){
+    clearInterval(timer);
+    let p=preguntas[nivel][actual];
+    let ops=document.querySelectorAll(".option");
+
+    ops.forEach(op=>op.onclick=null);
+
+    if(i==p.a){
+        ops[i].classList.add("correct");
+        score++;
+        document.getElementById("message").textContent=
+        mensajes[Math.floor(Math.random()*mensajes.length)];
+    }else{
+        ops[i].classList.add("wrong");
+        ops[p.a].classList.add("correct");
+    }
+}
+
+function siguiente(){
+    actual++;
+    if(actual<preguntas[nivel].length){
+        cargar();
+    }else{
+        document.getElementById("game").innerHTML=
+        `<h2>🏆 Fin del juego</h2>
+         <p style="font-size:25px;">Puntaje: ${score}</p>
+         <button onclick="location.reload()">🔄 Jugar otra vez</button>`;
+    }
+}
+</script>
+
+</body>
+</html>
